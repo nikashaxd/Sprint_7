@@ -1,7 +1,9 @@
 import allure
+import pytest
 import requests
+from utilities.courier_helper import generate_random_string
 from utilities.urls import Urls
-from conftest import create_and_delete_courier
+
 
 
 @allure.title("Авторизация курьера")
@@ -33,6 +35,23 @@ def test_courier_login_missing_fields():
     assert response.status_code == 400
     assert response.json().get(
         "message") == "Недостаточно данных для входа"
+
+
+@allure.description("Проверяем, что система вернёт ошибку, если отсутствует одно из обязательных полей")
+@pytest.mark.xfailed #504 = <Response [504]>.status_code без пароля
+@pytest.mark.parametrize("missing_field", ["login", "password"])
+def test_login_courier_missing_field(missing_field):
+    courier_data = {
+        "login": generate_random_string(10),
+        "password": generate_random_string(10),
+    }
+
+    courier_data.pop(missing_field)
+
+    response = requests.post(Urls.LOGIN_COURIER_URL, json=courier_data)
+
+    assert response.status_code == 400
+    assert response.json().get("message") == "Недостаточно данных для входа"
 
 
 @allure.title("Авторизация с неверными данными")
