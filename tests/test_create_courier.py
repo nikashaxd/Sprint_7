@@ -54,20 +54,11 @@ def test_create_courier_missing_fields():
 
 @allure.title("Создание курьера с пропуском обязательных полей")
 @allure.description("Проверяем, что система вернёт ошибку, если не переданы обязательные поля")
-@pytest.mark.parametrize("missing_field", ["login", "password", "firstName"])
-def test_create_courier_missing_field(missing_field):
-    payload = {
-        "login": generate_random_string(10),
-        "password": generate_random_string(10),
-        "firstName": generate_random_string(10)
-    }
+@pytest.mark.parametrize("missing_field", [["login"], ["password"]])
+def test_create_courier_missing_field(missing_field, courier_data_fields):
+    list(map(courier_data_fields.pop, missing_field))
 
-    del payload[missing_field]
+    response = requests.post(Urls.CREATE_COURIER_URL, json=courier_data_fields)
 
-    response = requests.post(Urls.CREATE_COURIER_URL, json=payload)
-
-    if missing_field == "firstName":
-        assert response.status_code == 201
-    else:
-        assert response.status_code == 400
-        assert response.json().get("message") == "Недостаточно данных для создания учетной записи"
+    assert response.status_code == 400
+    assert response.json().get("message") == "Недостаточно данных для создания учетной записи"

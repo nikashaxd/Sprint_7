@@ -29,3 +29,12 @@ def create_and_delete_courier():
 
     delete_response = requests.delete(f"{Urls.DELETE_COURIER_URL}/{courier_id}")
     assert delete_response.status_code == 200
+
+
+@pytest.fixture
+def courier_data_fields():
+    return {
+        "login": generate_random_string(10),
+        "password": generate_random_string(10),
+        "firstName": generate_random_string(10)
+    }
